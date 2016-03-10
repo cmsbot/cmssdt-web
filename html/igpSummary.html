@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <title>Summary of f igprof-navigator</title>
+
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Andreas Pfeiffer">
+	<!-- Date: 2010-06-11 -->
+
+	<style type="text/css" title="currentStyle">
+		@import "/SDT/html/jsExt/dataTables/media/css/demo_page.css";
+		@import "/SDT/html/jsExt/dataTables/media/css/demo_table.css";
+	</style>
+
+	<script type="text/javascript" src="/SDT/html/jsExt/dataTables/media/js/jquery.js"></script>
+	<script type="text/javascript" src="/SDT/html/js/igpSummary1.js"></script>
+
+<script>
+
+function update() {
+$.getJSON("/SDT/cgi-bin/getNavSumm.py?release=CMSSW_3_8_X_2010-06-15-0200", navsum);
+}
+
+</script>
+</head>
+<body>
+
+    <h2>Summary of igprof navigator results for IBs</h2>
+
+<p>List of results:</p>
+
+<table cellspacing="5" cellpadding="5" class="navSumm" border="1">
+<thead>
+<tr>
+  <th>candle</th>
+  <th>PerfTicks <br/>sec<br/>(samples)</th>
+  <th>MemTotal (end) <br/>counts<br/>(calls)</th>
+  <th>MemLive(mid) <br/>counts<br/>(calls)</th>
+  <th>MemLive(end) <br/>counts<br/>(calls)</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+
+<div id="errInfo"></div>
+
+<script>
+update();
+</script>
+
+    <hr>
+    <address><a href="mailto:andreas.pfeiffer@cern.ch">Andreas Pfeiffer</a></address>
+  </body>
+</html>

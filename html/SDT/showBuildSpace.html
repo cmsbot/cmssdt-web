@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <title>Disk space on build machines</title>
+
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Andreas Pfeiffer">
+	<!-- Date: 2009-03-24 -->
+
+	<style type="text/css" title="currentStyle">
+		@import "js/dataTables-1.4/media/css/demos.css";
+	</style>
+
+	<script type="text/javascript" src="js/dataTables-1.4/media/js/jquery.js"></script>
+	<script type="text/javascript" src="js/dataTables-1.4/media/js/jquery.dataTables.js"></script>
+<script>
+	/* Define two custom functions (asc and desc) for string sorting */
+	jQuery.fn.dataTableExt.oSort['string-case-asc']  = function(x,y) {
+		return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+	};
+
+	jQuery.fn.dataTableExt.oSort['string-case-desc'] = function(x,y) {
+		return ((x < y) ?  1 : ((x > y) ? -1 : 0));
+	};
+
+	$(document).ready(function() {
+             /* Build the DataTable with first column using our custom sort functions */
+             $('#diskInfo').dataTable( {
+							"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+								/* make the space info a link to the details page */
+								{
+									var details=aData[0]+'_'+aData[1].replace('/',"_");
+									$('td:eq(2)', nRow).html( '<a href="showDetails.py/'+details+'">'+aData[2]+'</b>' );
+								}
+								return nRow;
+							},
+                            "bSaveState" : true,
+                            "bProcessing": true,
+                            "sAjaxSource": "diskInfo-json.txt",
+                      	    "aaSorting": [ [0,'desc'], [1,'asc'] ],
+                      	    "aoColumns": [
+                                           { "sType": 'string-case' }, /* host */
+                      	                   null, /* disk */
+                      	                   null, /* free space */
+                      	                 ],
+									   } );
+/*
+			 var innerTable = $(this).parent().parent().next().find("table");
+	         if ($(this).data("visible")) {
+	           innerTable.fadeOut();
+	           innerTable.parent().hide();
+	           $(this)
+	             .data("visible", false)
+	             .text("+");
+	         } else {
+	           innerTable.parent().show();
+	           innerTable.fadeIn();
+	           $(this)
+	             .data("visible", true)
+	             .text("-");
+	         }
+*/
+	} );
+</script>
+
+</head>
+<body>
+
+    <h2>Disk space on build machines</h2>
+
+    <h3>Overview</h3>
+
+    <table border="0" cellspacing="5" cellpadding="5" class="display" id="diskInfo">
+      <thead>
+	<tr>
+	  <th>Machine</th>
+	  <th>Disk</th>
+	  <th>Free space</th>
+	</tr>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+
+
+    <hr>
+    <address><a href="mailto:andreas.pfeiffer@cern.ch">Andreas Pfeiffer</a></address>
+    <!-- Created: Wed Mar 25 12:21:08 CET 2009 -->
+    <!-- hhmts start -->
+Last modified: Mon Sep  7 09:23:20 CEST 2009
+<!-- hhmts end -->
+  </body>
+</html>

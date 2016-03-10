@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <title>Disk space on build machines</title>
+
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Andreas Pfeiffer">
+	<!-- Date: 2009-03-24 -->
+
+	<style type="text/css" title="currentStyle">
+		@import "js/dataTables-1.4/media/css/demos.css";
+	</style>
+
+	<script type="text/javascript" src="js/dataTables-1.4/media/js/jquery.js"></script>
+	<script type="text/javascript" src="js/dataTables-1.4/media/js/jquery.dataTables.js"></script>
+<script>
+	/* Define two custom functions (asc and desc) for string sorting */
+	jQuery.fn.dataTableExt.oSort['string-case-asc']  = function(x,y) {
+		return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+	};
+
+	jQuery.fn.dataTableExt.oSort['string-case-desc'] = function(x,y) {
+		return ((x < y) ?  1 : ((x > y) ? -1 : 0));
+	};
+
+	$(document).ready(function() {
+             /* Build the DataTable with first column using our custom sort functions */
+             $('#boxInfo').dataTable( {
+                            "bSaveState" : true,
+                            "bProcessing": true,
+                            "sAjaxSource": "boxInfo-json.txt",
+                      	    "aaSorting": [ [0,'desc'], [1,'asc'] ],
+                      	    "aoColumns": [
+                                           { "sType": 'string-case' }, /* host */
+                      	                   null, /* # users */
+                      	                   null, /* load */
+                      	                   null, /* load */
+                      	                   null, /* load */
+                      	                   null, /* userName */
+                      	                   null, /* nprocs for user */
+                      	                 ],
+		} );
+	} );
+</script>
+
+</head>
+<body>
+
+    <h2>Info on selected build machines</h2>
+
+    <h3>Overview</h3>
+
+    <table border="0" cellspacing="5" cellpadding="5" class="display" id="boxInfo">
+      <thead>
+	<tr>
+	  <th>Machine</th>
+	  <th># users</th>
+	  <th>load </th>
+	  <th>load </th>
+	  <th>load </th>
+	  <th>user</th>
+	  <th>procs for user</th>
+	</tr>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+
+    <hr>
+    <address><a href="mailto:andreas.pfeiffer@cern.ch">Andreas Pfeiffer</a></address>
+    <!-- Created: Wed Mar 25 12:21:08 CET 2009 -->
+    <!-- hhmts start -->
+Last modified: Mon Sep  7 09:23:20 CEST 2009
+<!-- hhmts end -->
+  </body>
+</html>

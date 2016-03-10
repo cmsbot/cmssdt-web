@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+import bottle, os, re
+from os.path import exists
+from bottle import route, debug, abort
+from commands import getstatusoutput
+from time import strptime
+app = bottle.default_app()
+debug(False)
+DAYS=["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+
+def format(s, **kwds):
+  return s % kwds
+
+BASE_AFS_DIR="/data/sdt/buildlogs"
+@route('/')
+def index():
+    return 'Index'
+
+def sanitize(s, ok="a-zA-Z0-9_.,:=+-"):
+  return re.sub("[.]/", "", re.sub("[^%s]" % ok, "", s))
+
+@route('/fwlite/<architecture>/<release>/<subsystem>/<package>')
+def buildLog(architecture, release, subsystem, package):
+  return extractFile(architecture, release, 'new_FWLITE/html-logs', 'new', format("%(subsystem)s/%(package)s/log.html", subsystem=sanitize(subsystem), package=sanitize(package)))
+
+@route('/<architecture>/<release>/<subsystem>/<package>')
+def buildLog(architecture, release, subsystem, package):
+  return extractFile(architecture, release, 'new/html-logs', 'new', format("%(subsystem)s/%(package)s/log.html", subsystem=sanitize(subsystem), package=sanitize(package)))
+
+@route('/<architecture>/<release>/unitTestLogs/<subsystem>/<package>')
+def unitTest(architecture, release, subsystem, package):
+  return "<pre>"+extractFile(architecture, release, 'unitTestLogs', '', format("unitTestLogs/%(subsystem)s/%(package)s/unitTest.log", subsystem=sanitize(subsystem), package=sanitize(package)),False)+"</pre>"
+
+@route('/<architecture>/<release>/addOnTests/logs/<filename>')
+def addOnTests(architecture, release, filename):
+  import urllib
+  return "<pre>"+extractFile(architecture, release, 'addOnTests', 'addOnTests/logs', sanitize(urllib.unquote(filename)),False)+"</pre>"
+
+@route('/<architecture>/<release>/pyRelValMatrixLogs/run/<workflow:re:[^/]+>/<filename>')
+def relValTests(architecture, release, workflow, filename):
+  import urllib
+  return "<pre>"+extractFile(architecture, release, 'pyRelValMatrixLogs', 'pyRelValPartialLogs', sanitize(urllib.unquote(workflow))+'/'+sanitize(urllib.unquote(filename)),False)+"</pre>"
+
+@route('/<architecture>/<release>/depViolationLogs/<subsystem>/<package>')
+def depVoilationLogs(architecture, release, subsystem, package):
+  return "<pre>"+extractFile(architecture, release, "", 'etc/dependencies/depViolationLogs', format("%(subsystem)s/%(package)s/log.txt", subsystem=sanitize(subsystem), package=sanitize(package)),False)+"</pre>"
+
+def extractFile(architecture, release, archive, subdir, fileToExtract,raw=True):
+  www = getReleaseWWW (architecture, release)
+  wwwFile = www+'/'+subdir+'/'+fileToExtract
+  command = 'cat '+wwwFile
+  if not exists(wwwFile):
+    archive = www+'/'+archive
+    if exists(archive+".zip"):
+      command = format("unzip -p %(archive)s.zip %(filename)s", archive=archive, filename=fileToExtract)
+    elif exists(archive+".tgz"):
+      if fileToExtract[0]!="/": fileToExtract="./"+fileToExtract
+      command = format("tar xOzf %(archive)s.tgz %(filename)s", archive=archive, filename=fileToExtract)
+    else:
+      abort(400, "Bad Request")
+  err, out = getstatusoutput(command)
+  if err:
+    abort(400, "Bad Request")
+  if not raw: out = out.replace('&','&amp').replace('<','&lt;').replace('>','&gt;')
+  return out
+
+def getReleaseWWW(architecture, release):
+  m = re.match(".*(20[0-9][0-9]-[0-9]{2}-[0-9]{2}-[0-9]{4})$", release)
+  if not m:
+    abort(400, "Bad Request")
+  d = strptime(m.group(1), "%Y-%m-%d-%H%M")
+  m = re.match("CMSSW_([0-9]+)_([0-9]+)_.*", release)
+  if not m:
+    abort(400, "Bad Request")
+  queue = re.sub("CMSSW_", "", re.sub("_X.*", "", release)).replace("_", ".")
+  archive = format("%(basedir)s/%(architecture)s/www/%(weekday)s/%(queue)s-%(weekday)s-%(hour)s/%(release)s",
+                  architecture=sanitize(architecture),
+                  weekday=DAYS[d.tm_wday],
+                  queue=queue,
+                  hour='%02i' % d.tm_hour,
+                  release=sanitize(release),
+                  basedir=BASE_AFS_DIR)
+  if not exists(archive):
+    abort(400, "Bad Request")
+  return archive
+
+if __name__ == '__main__':
+    from wsgiref.handlers import CGIHandler
+    CGIHandler().run(app)

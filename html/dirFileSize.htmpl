@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <title>Directory and file space details for </title>
+
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Andreas Pfeiffer">
+	<!-- Date: 2010-06-11 -->
+
+	<style type="text/css" title="currentStyle">
+		@import "/SDT/html/jsExt/dataTables/media/css/demo_page.css";
+		@import "/SDT/html/jsExt/dataTables/media/css/demo_table.css";
+	</style>
+
+	<script type="text/javascript" src="/SDT/html/jsExt/dataTables/media/js/jquery.js"></script>
+	<script type="text/javascript" src="/SDT/html/jsExt/dataTables/media/js/jquery.dataTables.js"></script>
+
+	<script type="text/javascript" src="/SDT/html/js/dirFileSize.js"></script>
+<script>
+
+</script>
+
+</head>
+<body>
+
+    <h2>Directory and file space in IBs</h2>
+
+<h3>NOTE: apparently the DataTables jQuery scripts have an issue with Safari 5, so if you try to use this browser,
+the table here will be empty - please use Safari 4 or Firefox !! </h3>
+
+    <table cellpadding="0" cellspacing="5" border="0">
+      <tr>
+        <td></td>
+        <td>IB to check:</td>  
+      </tr>
+      <tr id="filter_norm">
+        <td align="right"></td>
+        <td><input type="text" name="normal_filter" value="@@IB@@" size="30"></td>
+      </tr>
+    </table>
+
+    <table border="0" cellspacing="5" cellpadding="5" class="display" id="dirFileSize">
+      <thead>
+	<tr>
+	  <th>type</th>
+	  <th>Size<br/>(bytes)</th>
+	  <th>Directory or File in src tree</th>
+	</tr>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
+
+    <hr>
+    <address><a href="mailto:andreas.pfeiffer@cern.ch">Andreas Pfeiffer</a></address>
+  </body>
+</html>
