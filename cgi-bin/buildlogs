@@ -45,21 +45,20 @@ def relValTests(architecture, release, workflow, filename):
 def depVoilationLogs(architecture, release, subsystem, package):
   return "<pre>"+extractFile(architecture, release, "", 'etc/dependencies/depViolationLogs', format("%(subsystem)s/%(package)s/log.txt", subsystem=sanitize(subsystem), package=sanitize(package)),False)+"</pre>"
 
-@route('/iwyu/<architecture>/<release>/<subsystem>/<package>')
-def includeWhatYouUse(architecture, release, subsystem, package):
-  return extractJenkinsArtifacts(architecture, release, 'iwyu', 'iwyu', format("%(subsystem)s/%(package)s/", subsystem=sanitize(subsystem), package=sanitize(package)))
+@route('/iwyu/<architecture>/<release>/<subsystem>/<package>/<file>')
+def includeWhatYouUse(architecture, release, subsystem, package, file):
+  return extractJenkinsArtifacts(architecture, release, 'iwyu', 'iwyu', format("%(subsystem)s/%(package)s/%(file)s", subsystem=sanitize(subsystem), package=sanitize(package), file=sanitize(file)))
 
 def getArchiveFile(archive, fileToExtract, raw=True):
   command = None
   for ext in [".zip"]:
     if exists(archive+ext):
-      command = format("unzip -p %(archive)s.zip %(filename)s", archive=archive, filename=fileToExtract)
+      command = format("unzip -p %(archive)s%(ext)s %(filename)s", archive=archive, filename=fileToExtract)
       break
   if not command:
     for ext in [".tgz", ".tar.gz"]:
       if exists(archive+ext):
-        if fileToExtract[0]!="/": fileToExtract="./"+fileToExtract
-        command = format("tar xOzf %(archive)s.tgz %(filename)s", archive=archive, filename=fileToExtract)
+        command = format("tar xOzf %(archive)s%(ext)s %(filename)s", archive=archive, filename=fileToExtract, ext=ext)
         break
   if not command: abort(400, "Bad Request")
   err, out = getstatusoutput(command)
@@ -75,6 +74,7 @@ def extractFile(architecture, release, archive, subdir, fileToExtract,raw=True):
     if err: abort(400, "Bad Request")
     if not raw: out = out.replace('&','&amp').replace('<','&lt;').replace('>','&gt;')
     return out
+  if fileToExtract[0]!="/": fileToExtract="./"+fileToExtract
   archive = www+'/'+archive
   return getArchiveFile(archive, fileToExtract,raw)
 
