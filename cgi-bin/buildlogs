@@ -45,24 +45,42 @@ def relValTests(architecture, release, workflow, filename):
 def depVoilationLogs(architecture, release, subsystem, package):
   return "<pre>"+extractFile(architecture, release, "", 'etc/dependencies/depViolationLogs', format("%(subsystem)s/%(package)s/log.txt", subsystem=sanitize(subsystem), package=sanitize(package)),False)+"</pre>"
 
+@route('/iwyu/<architecture>/<release>/<subsystem>/<package>')
+def includeWhatYouUse(architecture, release, subsystem, package):
+  return extractJenkinsArtifacts(architecture, release, 'iwyu', 'iwyu', format("%(subsystem)s/%(package)s/", subsystem=sanitize(subsystem), package=sanitize(package)))
+
+def getArchiveFile(archive, fileToExtract, raw=True):
+  command = None
+  for ext in [".zip"]:
+    if exists(archive+ext):
+      command = format("unzip -p %(archive)s.zip %(filename)s", archive=archive, filename=fileToExtract)
+      break
+  if not command:
+    for ext in [".tgz", ".tar.gz"]:
+      if exists(archive+ext):
+        if fileToExtract[0]!="/": fileToExtract="./"+fileToExtract
+        command = format("tar xOzf %(archive)s.tgz %(filename)s", archive=archive, filename=fileToExtract)
+        break
+  if not command: abort(400, "Bad Request")
+  err, out = getstatusoutput(command)
+  if err: abort(400, "Bad Request")
+  if not raw: out = out.replace('&','&amp').replace('<','&lt;').replace('>','&gt;')
+  return out
+
 def extractFile(architecture, release, archive, subdir, fileToExtract,raw=True):
   www = getReleaseWWW (architecture, release)
   wwwFile = www+'/'+subdir+'/'+fileToExtract
-  command = 'cat '+wwwFile
-  if not exists(wwwFile):
-    archive = www+'/'+archive
-    if exists(archive+".zip"):
-      command = format("unzip -p %(archive)s.zip %(filename)s", archive=archive, filename=fileToExtract)
-    elif exists(archive+".tgz"):
-      if fileToExtract[0]!="/": fileToExtract="./"+fileToExtract
-      command = format("tar xOzf %(archive)s.tgz %(filename)s", archive=archive, filename=fileToExtract)
-    else:
-      abort(400, "Bad Request")
-  err, out = getstatusoutput(command)
-  if err:
-    abort(400, "Bad Request")
-  if not raw: out = out.replace('&','&amp').replace('<','&lt;').replace('>','&gt;')
-  return out
+  if exists(wwwFile):
+    err, out = getstatusoutput('cat '+wwwFile)
+    if err: abort(400, "Bad Request")
+    if not raw: out = out.replace('&','&amp').replace('<','&lt;').replace('>','&gt;')
+    return out
+  archive = www+'/'+archive
+  return getArchiveFile(archive, fileToExtract,raw)
+
+def extractJenkinsArtifacts(architecture, release, archive, subdir, fileToExtract, raw=True):
+  archiveFile = "/data/sdt/SDT/jenkins-artifacts/%s/%s/%s/%s" % (subdir, release, architecture, archive)
+  return getArchiveFile(archiveFile, fileToExtract, raw)
 
 def getReleaseWWW(architecture, release):
   m = re.match(".*(20[0-9][0-9]-[0-9]{2}-[0-9]{2}-[0-9]{4})$", release)
