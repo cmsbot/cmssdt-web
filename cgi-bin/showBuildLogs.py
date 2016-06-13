@@ -128,7 +128,7 @@ class BuildLogDisplay(object):
             from json import load
             with open(stats) as sfile:    
               self.IWYU = json.load(sfile)
-        except e:
+        except Exception, e:
           print "ERROR got exception when trying to load stats.json", str(e)
         return
     # --------------------------------------------------------------------------------
