@@ -87,6 +87,7 @@ class BuildLogDisplay(object):
         self.depViolLogs = {}
         self.depViolResults = {}
         self.topCgiLogString = ''
+        self.topCgiLogIWYU = ''
 
         return
       
@@ -234,7 +235,7 @@ class BuildLogDisplay(object):
         if pkg.name() in self.IWYU:
             nFail = self.IWYU[pname][0]
             iwyuLog = str(nFail)
-            col = ' <a href="'+self.topCgiLogString+"iwyu/"+pname+'/index.html"> '+iwyuLog+' </a>'
+            col = ' <a href="'+topCgiLogIWYU+pname+'/index.html"> '+iwyuLog+' </a>'
             colStyle = 'failed'
             pkgOK = False
         row.append( col )
@@ -371,6 +372,7 @@ class BuildLogDisplay(object):
         for p in packageList: origPkgList[p.name()] = 1
 
         self.topCgiLogString = config.siteInfo['CgiHtmlPath']+'buildlogs/'+plat+'/'+ib+'/'
+        self.topCgiLogIWYU   = config.siteInfo['CgiHtmlPath']+'buildlogs/iwyu/'+plat+'/'+ib+'/'
         if fwlite: self.topCgiLogString = config.siteInfo['CgiHtmlPath']+'buildlogs/fwlite/'+plat+'/'+ib+'/'
         # read libChecker info
         self.libChkErrMap = {}
