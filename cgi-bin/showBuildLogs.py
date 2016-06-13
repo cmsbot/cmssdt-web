@@ -127,7 +127,7 @@ class BuildLogDisplay(object):
           if os.path.exists (stats):
             from json import load
             with open(stats) as sfile:    
-              self.IWYU = json.load(sfile)
+              self.IWYU = load(sfile)
         except Exception, e:
           print "ERROR got exception when trying to load stats.json", str(e)
         return
@@ -235,7 +235,7 @@ class BuildLogDisplay(object):
         if pkg.name() in self.IWYU:
             nFail = self.IWYU[pname][0]
             iwyuLog = str(nFail)
-            col = ' <a href="'+topCgiLogIWYU+pname+'/index.html"> '+iwyuLog+' </a>'
+            col = ' <a href="'+self.topCgiLogIWYU+pname+'/index.html"> '+iwyuLog+' </a>'
             colStyle = 'failed'
             pkgOK = False
         row.append( col )
