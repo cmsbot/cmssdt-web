@@ -49,7 +49,15 @@ def depVoilationLogs(architecture, release, subsystem, package):
 def includeWhatYouUse(architecture, release, subsystem, package):
   return extractJenkinsArtifacts(architecture, release, 'iwyu', 'iwyu', format("%(subsystem)s/%(package)s/index.html", subsystem=sanitize(subsystem), package=sanitize(package)))
 
+@route('<architecture>/<release>/iwyu/<subsystem>/<package>/index.html')
+def includeWhatYouUse(architecture, release, subsystem, package):
+  return extractJenkinsArtifacts(architecture, release, 'iwyu', 'iwyu', format("%(subsystem)s/%(package)s/index.html", subsystem=sanitize(subsystem), package=sanitize(package)))
+
 @route('/iwyu/<architecture>/<release>/<subsystem>/<package>/build.log')
+def includeWhatYouUse(architecture, release, subsystem, package):
+  return "<pre>"+extractJenkinsArtifacts(architecture, release, 'iwyu', 'iwyu', format("%(subsystem)s/%(package)s/build.log", subsystem=sanitize(subsystem), package=sanitize(package)))+"</pre>"
+
+@route('/<architecture>/<release>/iwyu/<subsystem>/<package>/build.log')
 def includeWhatYouUse(architecture, release, subsystem, package):
   return "<pre>"+extractJenkinsArtifacts(architecture, release, 'iwyu', 'iwyu', format("%(subsystem)s/%(package)s/build.log", subsystem=sanitize(subsystem), package=sanitize(package)))+"</pre>"
 

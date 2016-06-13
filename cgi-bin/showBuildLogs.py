@@ -83,7 +83,7 @@ class BuildLogDisplay(object):
 
         #self.unitTestLogs = {}
         self.unitTestResults = {}
-
+        self.IWYU = {}
         self.depViolLogs = {}
         self.depViolResults = {}
         self.topCgiLogString = ''
@@ -117,6 +117,19 @@ class BuildLogDisplay(object):
 
         return
       
+    # --------------------------------------------------------------------------------
+
+    def getIWYU(self, rel, arch, jenkins_dir):
+        self.IWYU={}
+        try:
+          stats = os.path.join(jenkins_dir, "iwyu", rel, arch, "stats.json")
+          if os.path.exists (stats):
+            from json import load
+            with open(stats) as sfile:    
+              self.IWYU = json.load(sfile)
+        except e:
+          print "ERROR got exception when trying to load stats.json", str(e)
+        return
     # --------------------------------------------------------------------------------
 
     def showUnitTest(self, pkg, row, rowStyle) :
@@ -212,6 +225,24 @@ class BuildLogDisplay(object):
     
     # --------------------------------------------------------------------------------
 
+    def showIWYU(self, pkg, row, rowStyle) :
+        pname = pkg.name()
+        pkgOK =  True
+        if not self.IWYU : return pkgOK
+        col = ' - '
+        colStyle = ' '
+        if pkg.name() in self.IWYU:
+            nFail = self.IWYU[pname][0]
+            iwyuLog = str(nFail)
+            col = ' <a href="'+self.topCgiLogString+"iwyu/"+pname+'/index.html"> '+iwyuLog+' </a>'
+            colStyle = 'failed'
+            pkgOK = False
+        row.append( col )
+        rowStyle.append( colStyle )
+        return pkgOK
+    
+    # --------------------------------------------------------------------------------
+
     def showLibChecks(self, pkg, row, rowStyle) :
 
         pkgOK = True
@@ -299,6 +330,7 @@ class BuildLogDisplay(object):
         if pathReq.startswith("/fwlite/"):
           pathReq = pathReq.replace("/fwlite/", "/")
           fwlite = True
+        jenkinsLogs = '/data/sdt/SDT/jenkins-artifacts'
         topLogDir = '/data/sdt/buildlogs/'
         fullPath = topLogDir + pathReq
         self.normPath = os.path.normpath( fullPath )
@@ -386,8 +418,10 @@ class BuildLogDisplay(object):
             totErr += int(val)
         totErr += len(self.libChkErrMap.keys())
         
-        if not fwlite: self.getUnitTests(self.normPath)
-        if not fwlite: self.getDepViol(self.normPath)
+        if not fwlite:
+          self.getUnitTests(self.normPath)
+          self.getDepViol(self.normPath)
+          self.getIWYU(ib, plat, jenkinsLogs)
 
         lcErrs = 0
         if not fwlite: 
@@ -462,6 +496,11 @@ class BuildLogDisplay(object):
             hdrs.append('libCheck')
             szHdr.append(20)            
 
+        #  add headers for IWYU
+        if (not fwlite) and len(self.IWYU.keys()) > 0:
+            hdrs.append('IWYU')
+            szHdr.append(20)
+
         self.formatter.startTable(szHdr, hdrs)
         rowIndex = 0
         # --------------------------------------------------------------------------------
@@ -499,15 +538,16 @@ class BuildLogDisplay(object):
             
                 # SCRAM warnings
                 self.showScramWarnings(pkg, row, rowStyle)
-             
-                # add the dependency violation log file if available
-                if not fwlite: self.showDepViol(pkg, row, rowStyle)
 
-                # add the unit-test log file if available
-                if not fwlite: self.showUnitTest(pkg, row, rowStyle)
-                
-                # libchecker
-                if not fwlite: self.showLibChecks(pkg, row, rowStyle)
+                if not fwlite:
+                  # add the dependency violation log file if available
+                  self.showDepViol(pkg, row, rowStyle)
+                  # add the unit-test log file if available
+                  self.showUnitTest(pkg, row, rowStyle)
+                  # libchecker
+                  self.showLibChecks(pkg, row, rowStyle)
+                  # IWYU
+                  self.showIWYU(pkg, row, rowStyle)
 
                 rowIndex += 1
                 self.formatter.writeStyledRow(row,rowStyle)
@@ -554,23 +594,23 @@ class BuildLogDisplay(object):
              
             # add the dependency violation log file if available
             isOK4 = True
-            if not fwlite: 
-              isOK4 = self.showDepViol(pkg, row, rowStyle)
-            
-            # add the unit-test log file if available
             isOK5 = True
-            if not fwlite:
-              isOK5 = self.showUnitTest(pkg, row, rowStyle)
-                    
-            # libChecker
             isOK1 = True
-            if not fwlite:
+            isOK6 = True
+            if not fwlite: 
+              #dependency violations
+              isOK4 = self.showDepViol(pkg, row, rowStyle)
+              # add the unit-test log file if available
+              isOK5 = self.showUnitTest(pkg, row, rowStyle)
+              # libChecker
               isOK1 = self.showLibChecks(pkg, row, rowStyle)
+              # libChecker
+              isOK6 = self.showIWYU(pkg, row, rowStyle)
                 
-            if isOK1 and isOK2 and isOK3 and isOK4 and isOK5:
+            if isOK1 and isOK2 and isOK3 and isOK4 and isOK5 and isOK6:
                 # store for last part
                 newOK.append(pkg) 
-            elif not isOK1 and isOK2 and isOK3 and isOK4 and isOK5:
+            elif not isOK1 and isOK2 and isOK3 and isOK4 and isOK5 and isOK6:
                 libChkOnly.append(pkg)
             else:
                 rowIndex += 1
@@ -603,15 +643,15 @@ class BuildLogDisplay(object):
                 row.append( ' - ' )
                 rowStyle.append( ' ' )
 
-            # add the dependency violation log file if available
-            if not fwlite: self.showDepViol(pkg, row, rowStyle)
-            
-            # add the unit-test log file if available
-            if not fwlite: self.showUnitTest(pkg, row, rowStyle)
-
-            # if len( self.libChkErrMap.keys() ) > 0:
-            # libChecker
-            if not fwlite: self.showLibChecks(pkg, row, rowStyle)
+            if not fwlite: 
+              # add the dependency violation log file if available
+              self.showDepViol(pkg, row, rowStyle)
+              # add the unit-test log file if available
+              self.showUnitTest(pkg, row, rowStyle)
+              # if len( self.libChkErrMap.keys() ) > 0:
+              self.showLibChecks(pkg, row, rowStyle)
+              # if len( self.IWYU.keys() ) > 0:
+              self.showIWYU(pkg, row, rowStyle)
                 
             rowIndex += 1
             self.formatter.writeStyledRow(row,rowStyle)
