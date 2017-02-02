@@ -13,6 +13,10 @@ announced="state=Announced;"
 if ("deprel" in form) and form["deprel"].value=="1":
   announced="state=Deprecated;"
   
+anyarch=False
+if ("anyarch" in form) and form["anyarch"].value=="1":
+  anyarch=True
+
 architecture=""
 if "architecture" in form:
   architecture="architecture="+form["architecture"].value+";"
@@ -23,7 +27,7 @@ releases_file = open(releases_filename, "r")
 archs = {}
 rels  = []
 for line in releases_file:
-  if 'prodarch=1;' not in line: continue
+  if (not anyarch) and ('prodarch=1;' not in line): continue
   if production   and production   not in line: continue
   if announced    and announced    not in line: continue
   if architecture and architecture not in line: continue
@@ -33,7 +37,7 @@ for line in releases_file:
     k,v = item.split("=")
     data[k]= v
   if ("architecture" in data) and ("label" in data) and ("type" in data) and ("state" in data):
-    if data["label"] in rels: continue
+    if (not anyarch) and (data["label"] in rels): continue
     rels.append(data["label"])
     arch = data["architecture"]
     if arch not in archs: archs[arch]=[]
