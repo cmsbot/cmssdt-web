@@ -15,11 +15,11 @@ def check_event(data):
     branch = data["ref"]
     if not branch.startswith("refs/heads/"):
       return False, event
-    if (not data['repository']['full_name'] in ['cms-sw/cms-bot', 'cms-sw/cmsdist', 'cms-sw/cmssw']):
+    if (not data['repository']['full_name'] in ['cms-sw/cms-bot', 'cms-sw/cmsdist', 'cms-sw/cmssw', 'cms-sw/cmssdt-web']):
       return False,event
     repo = data['repository']['name']
     branch = branch.replace("refs/heads/","")
-    if (repo in ['cms-bot']) or (branch=="master"):
+    if (repo in ['cms-bot', 'cms-sw/cmssdt-web']) or (branch=="master"):
       return True, event
     elif (repo in ['cmssw']) and branch.startswith("CMSSW_"):
       return True, event
