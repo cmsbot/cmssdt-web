@@ -99,11 +99,10 @@ def get_parameters(info, event):
     etype = "issue"
   elif event in ['pull_request']:
     etype = "pull_request"
-    if (info['action'] in ['synchronize']):
-      xp = []
-      xp.append({"name":"PULL_REQUEST","value":info[etype]["number"]})
-      xp.append({"name":"REPOSITORY","value":repo})
-      xjob = [(json.dumps({"parameter":xp}),"cms-prs-cache")]
+    xp = []
+    xp.append({"name":"PULL_REQUEST","value":info[etype]["number"]})
+    xp.append({"name":"REPOSITORY","value":repo})
+    xjob = [(json.dumps({"parameter":xp}),"cms-prs-cache")]
   else:
     return [('','')]
   title = info[etype]["title"]
