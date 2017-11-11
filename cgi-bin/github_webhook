@@ -26,10 +26,7 @@ def check_event(data):
     elif (repo in ['cmsdist']) and branch.startswith("IB/CMSSW_"):
       return True, event
     return False, event
-  elif (event == 'pull_request'):
-    if (not data['action'] in ['opened','synchronize']): return False,event
-    if (data['repository']['full_name'] in ['cms-sw/cmsdist']) and (not data["pull_request"]["base"]["ref"].startswith("IB/CMSSW_")):
-      return False,event
+  elif (event == 'pull_request'): return True,event
   elif (event == 'issues') and (not data['action'] in ['opened']): return False,event
   elif (event == 'issue_comment'):
     if (not data['action'] in ['created']): return False,event
@@ -103,6 +100,8 @@ def get_parameters(info, event):
     xp.append({"name":"PULL_REQUEST","value":info[etype]["number"]})
     xp.append({"name":"REPOSITORY","value":repo})
     xjob = [(json.dumps({"parameter":xp}),"cms-prs-cache")]
+    if (not info['action'] in ['opened','synchronize']): return xjob
+    if (repo in ['cms-sw/cmsdist']) and (not info[etype]["base"]["ref"].startswith("IB/CMSSW_")): return xjob
   else:
     return [('','')]
   title = info[etype]["title"]
