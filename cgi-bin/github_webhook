@@ -134,7 +134,9 @@ except Exception as e:
 
 #check valid data, ip and signature of source
 valid, event = check_event(payload)
+print valid, event
 if (not valid) or (not check_ip()) or (not check_signature(data)):
+  print "Invalid or wrong signatures"
   sys.exit()
 
 #trigger jenkins job
