@@ -84,22 +84,28 @@ def get_parameters(info, event):
   if event in ['comp_issue_comment']:
     job = "comp-bot"
     params.append({"name":"PULL_REQUEST","value":info["issue"]["number"]})
-    return json.dumps({"parameter":params}) , job
+    return [(json.dumps({"parameter":params}) , job)]
 
   if event in ['push']:
     job = "github-push-hook"
     params.append({"name":"REPOSITORY","value":repo})
     params.append({"name":"BRANCH","value" : info["ref"].replace("refs/heads/","")})
     params.append({"name":"COMMITS","value" : ",".join([c['id'] for c in info['commits']])})
-    return json.dumps({"parameter":params}) , job
+    return [(json.dumps({"parameter":params}) , job)]
 
+  xjob = []
   etype = ""
   if event in ['issues', 'issue_comment']:
     etype = "issue"
   elif event in ['pull_request']:
     etype = "pull_request"
+    if (info['action'] in ['synchronize']):
+      xp = []
+      xp.append({"name":"PULL_REQUEST","value":info[etype]["number"]})
+      xp.append({"name":"REPOSITORY","value":repo})
+      xjob = [(json.dumps({"parameter":xp}),"cms-prs-cache")]
   else:
-    return '',''
+    return [('','')]
   title = info[etype]["title"]
   pr_num = info[etype]["number"]
   if (repo == "cms-sw/cmssw") and (re.match('^[Bb]uild[ ]+(CMSSW_[^ ]+)', title)):
@@ -117,7 +123,7 @@ def get_parameters(info, event):
       params.append({"name":"ISSUES","value":"true"})
     else:
       job = "cms-bot-externals"
-  return json.dumps({"parameter":params}), job
+  return xjob+[(json.dumps({"parameter":params}), job)]
 
 #get data
 data = sys.stdin.read()
@@ -133,8 +139,9 @@ if (not valid) or (not check_ip()) or (not check_signature(data)):
   sys.exit()
 
 #trigger jenkins job
-jenkins_parameters, job = get_parameters(payload, event)
-if job:
+for x in get_parameters(payload, event):
+  jenkins_parameters, job = x
+  if not job: continue
   url = 'http://cmsjenkins01.cern.ch:8080/jenkins/job/'+ job + '/build'
   print jenkins_parameters,job
   data = {
