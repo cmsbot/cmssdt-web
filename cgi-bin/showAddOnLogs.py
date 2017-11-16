@@ -203,25 +203,31 @@ class LogViewer(object):
             self.formatter.writeH3("Test logs not yet available")
             return
 
-	stepRes = [[],[]]
+	stepRes = [[0,0,0,0],[0,0,0,0]]
 	actualSteps = 0
 
         xRest = {}
         for dirName, cmdList in self.commands.items():
-            for i in range(0,len(cmdList)):
-                for j in range(len(stepRes),i+1):
-                  stepRes[0].append(0)
-                  stepRes[1].append(0)
-                cmd = cmdList[i]
+	    step = -1
+            for i in range(0,len(stepRes[0])):
+                try:
+                    cmd = cmdList[i]
+                except:
+                    continue
                 cmdx = cmd.replace(' ','_')
+                if 'ln -s ' in cmd :
+                    continue
+                if cmdx in notrun:
+                    continue
+                step += 1
 		res = 'passed'
                 if cmdx in failed:
-                   stepRes[1][i]=stepRes[1][i]+1
+                   stepRes[1][step]=stepRes[1][step]+1
 		   res = 'failed'
                 else:
-                    stepRes[0][i]=stepRes[0][i]+1
+                    stepRes[0][step]=stepRes[0][step]+1
 		xRest[dirName+':'+str(i)] = res
-                if actualSteps<i: actualSteps = i
+                if actualSteps<step: actualSteps = step
 
         self.formatter.startTable ( [15, 15, 15, 15, 15], ['Step','total', 'passed', 'failed'])
 	for i in range(0,actualSteps+1):
@@ -246,18 +252,17 @@ class LogViewer(object):
         self.getLogFile(os.path.dirname(normPath))
         topCgiLogString = config.siteInfo['CgiHtmlPath']+'buildlogs/'+pathReq.split('/')[1]+'/'+ib+'/'
         for dirName, cmdList in self.commands.items():
-            for i in range(0,len(cmdList)):
+            step = 0
+            for i in range(0,len(stepRes[0])):
 	        styleClass = 'passed'
 		try:
 		    styleClass = xRest[dirName+':'+str(i)]
 		except:
-		    break
+		    continue
                 cmd = cmdList[i]
-                logFileName = self.findLogFile(dirName+"_"+str(i+1)+".log")
-                if not logFileName:
-                  lfPart = cmd.replace("'",'').replace('/','_').replace(' ',"_")
-                  logFileName = 'cmsDriver-'+dirName+'_'+'%s.log' % lfPart
-                  logFileName = self.findLogFile(logFileName)
+                lfPart = cmd.replace("'",'').replace('/','_').replace(' ',"_")
+                logFileName = 'cmsDriver-'+dirName+'_'+'%s.log' % lfPart
+                logFileName = self.findLogFile(logFileName)
 
                 outLine = '<a href="'+topCgiLogString+logFileName+'">'
                 if newStyle:
@@ -272,21 +277,17 @@ class LogViewer(object):
                 if dirName not in rows.keys():
                     rows[dirName] = {}
                     styles[dirName] = {}
-                rows[dirName][i] = outLine 
-                styles[dirName][i] = styleClass 
+                rows[dirName][step] = outLine 
+                styles[dirName][step] = styleClass 
                 if dirName not in orderedKeys: orderedKeys.append(dirName)
-        xtable = [[],[]]
-        for i in range(actualSteps):
-          if newStyle:
-            xtable[0].append(20)
-          else:
-            xtable[0].append(30)
-          xtable[1].append("step"+str(i+1))
+
+                step += 1
+
         if newStyle:
-            self.formatter.startTable( [10, 30 ]+xtable[0], ['id', 'test']+xtable[1])
+            self.formatter.startTable( [10, 30, 20, 20, 20], ['id', 'test', 'step1', 'step2', 'step3'])
             self.formatter.write('<b><a href="'+scriptName+pathReq+'&old">Old Style</a></b>')
         else:
-            self.formatter.startTable( [10]+xtable[0], ['id']+xtable[1])
+            self.formatter.startTable( [10, 30, 30, 30], ['id', 'step1', 'step2', 'step3'])
             self.formatter.write('<b><a href="'+scriptName+pathReq+'&new">New Style</a></b>')
         
         num = 0
