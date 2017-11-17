@@ -142,7 +142,7 @@ if (not valid) or (not check_ip()) or (not check_signature(data)):
 for x in get_parameters(payload, event):
   jenkins_parameters, job = x
   if not job: continue
-  url = 'http://cmsjenkins01.cern.ch:8080/jenkins/job/'+ job + '/build'
+  url = 'http://cmsjenkins03.cern.ch:8080/jenkins/job/'+ job + '/build'
   print jenkins_parameters,job
   data = {
               "json": jenkins_parameters,
