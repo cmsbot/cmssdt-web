@@ -3,7 +3,7 @@ import sys, json
 import urllib2, urllib
 
 try: jenkins_server=sys.argv[1]
-except: jenkins_server="cmsjenkins01.cern.ch"
+except: jenkins_server="cmsjenkins03.cern.ch"
 params = []
 job="jenkins-installation-trigger-cli"
 params.append({"name":"JOB_PARAM1","value":"cmssdt1"})
