@@ -215,7 +215,10 @@ class BuildLogDisplay(object):
             nFail = self.depViolResults[pkg.name()][0]
             depViolLog = str(nFail) + ' violation'
             if nFail > 1 : depViolLog += 's'
-            col = ' <a href="'+self.topCgiLogString+"depViolationLogs/"+self.depViolLogs[pkg.name()]+'"> '+depViolLog+' </a>'
+            if pkg.name() in self.depViolLogs:
+              col = ' <a href="'+self.topCgiLogString+"depViolationLogs/"+self.depViolLogs[pkg.name()]+'"> '+depViolLog+' </a>'
+            else:
+              col = "X"
             colStyle = 'failed'
             pkgOK = False
             
