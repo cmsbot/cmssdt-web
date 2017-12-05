@@ -144,8 +144,6 @@ if (not valid) or (not check_ip()) or (not check_signature(data)):
 xparam = []
 xparam.append({"name":"REPOSITORY","value":payload["repository"]["full_name"]})
 xparam.append({"name":"EVENT","value":event})
-if "push"==event:xparam.append({"name":"COMMITS","value":",".join([c['id'] for c in payload['commits']])})
-else:xparam.append({"name":"COMMITS","value":""})
 etype=""
 if   event in ['pull_request']:etype="pull_request"
 elif event in ['issues', 'issue_comment']: etype="issue"
