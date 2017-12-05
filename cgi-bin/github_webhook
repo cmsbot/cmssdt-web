@@ -162,7 +162,7 @@ except:
 for x in get_parameters(payload, event)+[(json.dumps({"parameter":xparam}),"github-webhook")]:
   jenkins_parameters, job = x
   if not job: continue
-  url = 'http://cmsjenkins03.cern.ch:8080/jenkins/job/'+ job + '/build'
+  url = repo_config.JENKINS_SERVER+'/job/'+ job + '/build'
   print jenkins_parameters,job
   data = {
               "json": jenkins_parameters,
