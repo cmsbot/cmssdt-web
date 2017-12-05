@@ -151,6 +151,8 @@ try: xparam.append({"name":"ISSUE_NUMBER","value":payload[etype]["number"]})
 except: xparam.append({"name":"ISSUE_NUMBER","value":""})
 try: xparam.append({"name":"TITLE","value":payload[etype]["title"]})
 except: xparam.append({"name":"TITLE","value":""})
+try: xparam.append({"name":"ACTION","value":payload['action']})
+except: xparam.append({"name":"ACTION","value":""})
 try: xparam.append({"name":"BRANCH","value":payload[etype]["base"]["ref"]})
 except:
   try: xparam.append({"name":"BRANCH","value":payload["ref"]})
