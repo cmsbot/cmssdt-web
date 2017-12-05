@@ -30,7 +30,6 @@ def check_event(data):
   elif (event == 'issues') and (not data['action'] in ['opened']): return False,event
   elif (event == 'issue_comment'):
     if (not data['action'] in ['created']): return False,event
-    sys.path.append(BASE_DIRECTORY+"/sdt/cms-bot")
     from categories import USERS_TO_TRIGGER_HOOKS as l2
     from releases import USERS_TO_TRIGGER_HOOKS as managers
     valid_admins = l2 | managers
@@ -131,6 +130,10 @@ except Exception as e:
   print "Invalid data, can not read json input"
   sys.exit()
 
+sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot"))
+sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot",payload["repository"]["full_name"]))
+import repo_config
+
 #check valid data, ip and signature of source
 valid, event = check_event(payload)
 print valid, event
@@ -138,8 +141,25 @@ if (not valid) or (not check_ip()) or (not check_signature(data)):
   print "Invalid or wrong signatures"
   sys.exit()
 
+xparam = []
+xparam.append({"name":"REPOSITORY","value":payload["repository"]["full_name"]})
+xparam.append({"name":"EVENT","value":event})
+if "push"==event:xparam.append({"name":"COMMITS","value":",".join([c['id'] for c in payload['commits']])})
+else:xparam.append({"name":"COMMITS","value":""})
+etype=""
+if   event in ['pull_request']:etype="pull_request"
+elif event in ['issues', 'issue_comment']: etype="issue"
+try: xparam.append({"name":"ISSUE_NUMBER","value":payload[etype]["number"]})
+except: xparam.append({"name":"ISSUE_NUMBER","value":""})
+try: xparam.append({"name":"TITLE","value":payload[etype]["title"]})
+except: xparam.append({"name":"TITLE","value":""})
+try: xparam.append({"name":"BRANCH","value":payload[etype]["base"]["ref"]})
+except:
+  try: xparam.append({"name":"BRANCH","value":payload["ref"]})
+  except: xparam.append({"name":"BRANCH","value":""})
+
 #trigger jenkins job
-for x in get_parameters(payload, event):
+for x in get_parameters(payload, event)+[(json.dumps({"parameter":xparam}),"github-webhook")]:
   jenkins_parameters, job = x
   if not job: continue
   url = 'http://cmsjenkins03.cern.ch:8080/jenkins/job/'+ job + '/build'
