@@ -131,7 +131,7 @@ except Exception as e:
   sys.exit()
 
 sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot"))
-sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot",payload["repository"]["full_name"]))
+sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot/repos",payload["repository"]["full_name"]))
 import repo_config
 
 #check valid data, ip and signature of source
@@ -173,4 +173,4 @@ for x in get_parameters(payload, event)+[(json.dumps({"parameter":xparam}),"gith
     req = urllib2.Request(url=url,data=data,headers={"ADFS_LOGIN" : "cmssdt"})
     content = urllib2.urlopen(req).read()
   except Exception as e:
-    print "Unable to start jenkins job"
+    print "Unable to start jenkins job:",e
