@@ -42,15 +42,22 @@ def check_event(data):
   return True, event
 
 #check signature function
-def check_signature(data):
+def check_signature(data, repo_config):
   if not 'HTTP_X_HUB_SIGNATURE' in os.environ: return False
   sha_name, signature = os.environ['HTTP_X_HUB_SIGNATURE'].split('=')
   if sha_name != 'sha1': return False
+  secret_file = BASE_DIRECTORY+'/secrets/github_hook_secret'
   try:
-    secret = open(BASE_DIRECTORY+'/secrets/github_hook_secret','r').read().split('\n')[0].strip()
-  except Exception as e:
-    print "Unable to read secret file"
-    return False
+    from commands import getstatusoutput as run_cmd
+    err, out = run_cmd("echo '%s' | openssl enc -d -a -base64 -aes-256-cbc -salt -pass file:%s" % (repo_config.GITHUB_WEBHOOK_TOKEN, secret_file))
+    if err: return False
+    secret = out.strip("\n")
+  except:
+    try:
+      secret = open(secret_file).read().split('\n')[0].strip()
+    except Exception as e:
+      print "Unable to read secret file"
+      return False
   mac = hmac.new(str(secret), msg=data, digestmod=sha1)
   print str(mac.hexdigest()) , str(signature)
   return str(mac.hexdigest()) == str(signature)
@@ -87,7 +94,7 @@ import repo_config
 #check valid data, ip and signature of source
 valid, event = check_event(payload)
 print valid, event
-if (not valid) or (not check_ip()) or (not check_signature(data)):
+if (not valid) or (not check_ip()) or (not check_signature(data, repo_config)):
   print "Invalid or wrong signatures"
   sys.exit()
 
