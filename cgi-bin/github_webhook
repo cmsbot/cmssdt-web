@@ -30,6 +30,7 @@ def check_event(data):
   elif (event == 'issues') and (not data['action'] in ['opened']): return False,event
   elif (event == 'issue_comment'):
     if (not data['action'] in ['created']): return False,event
+    if not data['repository']['full_name'] in ['cms-sw/cmsdist','cms-sw/cmssw']: return True,event
     from categories import USERS_TO_TRIGGER_HOOKS as l2
     from releases import USERS_TO_TRIGGER_HOOKS as managers
     valid_admins = l2 | managers
