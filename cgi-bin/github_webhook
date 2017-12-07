@@ -72,56 +72,6 @@ def check_ip():
     src_ip = ''.join([ "{0:08b}".format(int(i)) for i in os.environ['REMOTE_ADDR'].split('.')])[0:mask]
   return ip == src_ip
 
-#test jenkins parameters
-def get_parameters(info, event):
-  params = []
-  job = ""
-  repo = info["repository"]["full_name"]
-  if event in ['comp_issue_comment']:
-    job = "comp-bot"
-    params.append({"name":"PULL_REQUEST","value":info["issue"]["number"]})
-    return [(json.dumps({"parameter":params}) , job)]
-
-  if event in ['push']:
-    job = "github-push-hook"
-    params.append({"name":"REPOSITORY","value":repo})
-    params.append({"name":"BRANCH","value" : info["ref"].replace("refs/heads/","")})
-    params.append({"name":"COMMITS","value" : ",".join([c['id'] for c in info['commits']])})
-    return [(json.dumps({"parameter":params}) , job)]
-
-  xjob = []
-  etype = ""
-  if event in ['issues', 'issue_comment']:
-    etype = "issue"
-  elif event in ['pull_request']:
-    etype = "pull_request"
-    xp = []
-    xp.append({"name":"PULL_REQUEST","value":info[etype]["number"]})
-    xp.append({"name":"REPOSITORY","value":repo})
-    xjob = [(json.dumps({"parameter":xp}),"cms-prs-cache")]
-    if (not info['action'] in ['opened','synchronize']): return xjob
-    if (repo in ['cms-sw/cmsdist']) and (not info[etype]["base"]["ref"].startswith("IB/CMSSW_")): return xjob
-  else:
-    return [('','')]
-  title = info[etype]["title"]
-  pr_num = info[etype]["number"]
-  if (repo == "cms-sw/cmssw") and (re.match('^[Bb]uild[ ]+(CMSSW_[^ ]+)', title)):
-    job = "query-build-release-issues"
-    params.append({"name":"TIME_INTERVAL","value":"60"})
-    params.append({"name":"FORCE_ISSUE","value":pr_num})
-    params.append({"name":"IGNORE_ISSUE","value":"6375"})
-    params.append({"name":"DRY_RUN","value":"false"})
-  else:
-    job = "cms-bot"
-    params.append({"name":"TIME_INTERVAL","value":"60"})
-    params.append({"name":"FORCE_PULL_REQUEST","value":pr_num})
-    params.append({"name":"REPOSITORY","value":repo})
-    if (repo=="cms-sw/cmssw") or (repo=="cms-sw/cmsdist"):
-      params.append({"name":"ISSUES","value":"true"})
-    else:
-      job = "cms-bot-externals"
-  return xjob+[(json.dumps({"parameter":params}), job)]
-
 #get data
 data = sys.stdin.read()
 try:
@@ -159,7 +109,7 @@ except:
   except: xparam.append({"name":"BRANCH","value":""})
 
 #trigger jenkins job
-for x in get_parameters(payload, event)+[(json.dumps({"parameter":xparam}),"github-webhook")]:
+for x in [(json.dumps({"parameter":xparam}),"github-webhook")]:
   jenkins_parameters, job = x
   if not job: continue
   url = repo_config.JENKINS_SERVER+'/job/'+ job + '/build'
