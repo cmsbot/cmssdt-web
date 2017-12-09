@@ -102,6 +102,12 @@ if (not valid) or (not check_ip()) or (not check_signature(data, repo_config)):
 xparam = []
 xparam.append({"name":"REPOSITORY","value":payload["repository"]["full_name"]})
 xparam.append({"name":"EVENT","value":event})
+try: xparam.append({"name":"ACTION","value":payload['action']})
+except: xparam.append({"name":"ACTION","value":""})
+if "labeled" in xparam[-1]["value"]:
+  print "Ignored Event/Action:", xparam
+  sys.exit()
+
 etype=""
 if   event in ['pull_request']:etype="pull_request"
 elif event in ['issues', 'issue_comment']: etype="issue"
@@ -109,8 +115,6 @@ try: xparam.append({"name":"ISSUE_NUMBER","value":payload[etype]["number"]})
 except: xparam.append({"name":"ISSUE_NUMBER","value":""})
 try: xparam.append({"name":"TITLE","value":payload[etype]["title"]})
 except: xparam.append({"name":"TITLE","value":""})
-try: xparam.append({"name":"ACTION","value":payload['action']})
-except: xparam.append({"name":"ACTION","value":""})
 try: xparam.append({"name":"BRANCH","value":payload[etype]["base"]["ref"]})
 except:
   try: xparam.append({"name":"BRANCH","value":payload["ref"]})
