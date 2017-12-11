@@ -89,7 +89,7 @@ except Exception as e:
   sys.exit()
 
 sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot"))
-sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot/repos",payload["repository"]["full_name"]))
+sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot/repos",payload["repository"]["full_name"].replace("-","_")))
 import repo_config
 
 #check valid data, ip and signature of source
