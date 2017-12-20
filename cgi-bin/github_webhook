@@ -110,7 +110,7 @@ if "labeled" in xparam[-1]["value"]:
 
 etype=""
 if   event in ['pull_request']:etype="pull_request"
-elif event in ['issues', 'issue_comment']: etype="issue"
+elif event in ['issues', 'issue_comment','comp_issue_comment']: etype="issue"
 try: xparam.append({"name":"ISSUE_NUMBER","value":payload[etype]["number"]})
 except: xparam.append({"name":"ISSUE_NUMBER","value":""})
 try: xparam.append({"name":"TITLE","value":payload[etype]["title"]})
