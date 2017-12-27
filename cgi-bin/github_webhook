@@ -87,9 +87,9 @@ try:
 except Exception as e:
   print "Invalid data, can not read json input"
   sys.exit()
-
+repo_name = payload["repository"]["full_name"]
 sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot"))
-sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot/repos",payload["repository"]["full_name"].replace("-","_")))
+sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot/repos",repo_name.replace("-","_")))
 import repo_config
 
 #check valid data, ip and signature of source
@@ -100,11 +100,11 @@ if (not valid) or (not check_ip()) or (not check_signature(data, repo_config)):
   sys.exit()
 
 xparam = []
-xparam.append({"name":"REPOSITORY","value":payload["repository"]["full_name"]})
+xparam.append({"name":"REPOSITORY","value":repo_name})
 xparam.append({"name":"EVENT","value":event})
 try: xparam.append({"name":"ACTION","value":payload['action']})
 except: xparam.append({"name":"ACTION","value":""})
-if "labeled" in xparam[-1]["value"]:
+if ("labeled" in xparam[-1]["value"]) and (not repo_name.startswith("cms-sw/")):
   print "Ignored Event/Action:", xparam
   sys.exit()
 
