@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+import bottle, os, re, string
+from os.path import exists
+from bottle import route, debug, abort, request, redirect
+from commands import getstatusoutput
+from time import strptime
+
+app = bottle.default_app()
+debug(False)
+DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+
+
+def format(s, **kwds):
+    return s % kwds
+
+
+BASE_AFS_DIR = "/data/sdt/buildlogs"
+
+@route('/<architecture>/<release>/unitTestLogs/<subsystem>/<package>')
+def returnFileReader(architecture, release, subsystem, package):
+    host = request.urlparts[1] # get host from url 
+
+    data = None
+    with open('/var/www/SDT/html/fileReader/index.html', 'r') as myfile:
+        data=myfile.read()
+    return data
+    # return redirect("/SDT/html/fileReader/#/http://" + host + "/SDT/cgi-bin/buildlogs/{0}/{1}/unitTestLogs/{2}/{3}/raw".format(architecture,release,subsystem,package) ) 
+
+
+@route('/', defaults={'path': ''})
+@route('/<path:path>')
+def catch_all(path):
+    return redirect("/SDT/cgi-bin/buildlogs/" + path)
+
+
+if __name__ == '__main__':
+    from wsgiref.handlers import CGIHandler
+
+    CGIHandler().run(app)
