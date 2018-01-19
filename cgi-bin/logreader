@@ -21,10 +21,9 @@ def returnFileReader(architecture, release, subsystem, package):
     host = request.urlparts[1] # get host from url 
 
     data = None
-    with open('/var/www/SDT/html/fileReader/index.html', 'r') as myfile:
+    with open('/var/www/SDT/html/logreader/index.html', 'r') as myfile:
         data=myfile.read()
     return data
-    # return redirect("/SDT/html/fileReader/#/http://" + host + "/SDT/cgi-bin/buildlogs/{0}/{1}/unitTestLogs/{2}/{3}/raw".format(architecture,release,subsystem,package) ) 
 
 
 @route('/', defaults={'path': ''})
