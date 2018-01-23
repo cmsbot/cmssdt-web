@@ -17,9 +17,9 @@ def format(s, **kwds):
 BASE_AFS_DIR = "/data/sdt/buildlogs"
 
 @route('/<architecture>/<release>/unitTestLogs/<subsystem>/<package>')
+@route('/<architecture>/<release>/addOnTests/logs/<filename>')
+@route('/<architecture>/<release>/pyRelValMatrixLogs/run/<workflow:re:[^/]+>/<filename>')
 def returnFileReader(architecture, release, subsystem, package):
-    host = request.urlparts[1] # get host from url 
-
     data = None
     with open('/var/www/SDT/html/logreader/index.html', 'r') as myfile:
         data=myfile.read()
