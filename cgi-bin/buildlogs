@@ -58,8 +58,7 @@ def addOnTestsRaw(architecture, release, filename):
 @route('/raw_read_config/<architecture>/<release>/addOnTests/logs/<filename>')
 def addOnTestsRawConfig(architecture, release, filename):
   import urllib
-  # TODO filename + "-read_config"
-  return extractFile(architecture, release, 'addOnTests', 'addOnTests/logs', sanitize(urllib.unquote(filename)),False)
+  return extractFile(architecture, release, 'addOnTests', 'addOnTests/logs', sanitize(urllib.unquote(filename) + "-read_config"),False)
 
 #----- relValTests
 @route('/<architecture>/<release>/pyRelValMatrixLogs/run/<workflow:re:[^/]+>/<filename>')
@@ -75,8 +74,7 @@ def relValTestsRaw(architecture, release, workflow, filename):
 @route('/raw_read_config/<architecture>/<release>/pyRelValMatrixLogs/run/<workflow:re:[^/]+>/<filename>')
 def relValTestsRawConfig(architecture, release, workflow, filename):
   import urllib
-  # TODO filename + "-read_config"
-  return extractFile(architecture, release, 'pyRelValMatrixLogs', 'pyRelValPartialLogs', sanitize(urllib.unquote(workflow))+'/'+sanitize(urllib.unquote(filename)),False)  
+  return extractFile(architecture, release, 'pyRelValMatrixLogs', 'pyRelValPartialLogs', sanitize(urllib.unquote(workflow))+'/'+sanitize(urllib.unquote(filename) + "-read_config"),False)  
 #----- 
 
 @route('/<architecture>/<release>/depViolationLogs/<subsystem>/<package>')
