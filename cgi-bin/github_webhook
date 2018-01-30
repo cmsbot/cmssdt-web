@@ -6,6 +6,7 @@ from hashlib import sha1
 import urllib2, urllib
 
 BASE_DIRECTORY = "/data"
+cmssw_repos = ['cms-sw/cms-bot', 'cms-sw/cmsdist', 'cms-sw/cmssw', 'cms-sw/cmssdt-web','cms-sw/cms-docker','cms-sw/cmssdt-ib']
 
 def check_event(data):
   if not 'HTTP_X_GITHUB_EVENT' in os.environ: return False,''
@@ -15,7 +16,7 @@ def check_event(data):
     branch = data["ref"]
     if not branch.startswith("refs/heads/"):
       return False, event
-    if (not data['repository']['full_name'] in ['cms-sw/cms-bot', 'cms-sw/cmsdist', 'cms-sw/cmssw', 'cms-sw/cmssdt-web','cms-sw/cms-docker']):
+    if (not data['repository']['full_name'] in cmssw_repos):
       return False,event
     repo = data['repository']['name']
     branch = branch.replace("refs/heads/","")
