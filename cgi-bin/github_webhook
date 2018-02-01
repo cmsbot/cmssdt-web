@@ -22,7 +22,13 @@ def check_event(data):
     if (repo in ['cmssw']) and branch.startswith("CMSSW_"): return True, event
     if (repo in ['cmsdist']) and branch.startswith("IB/CMSSW_"): return True, event
     return False, event
-  elif (event == 'pull_request'): return True,event
+  if not is_valid_gh_repo(full_name):
+    try:
+      if repo_config.GH_REPO_FULLNAME!=full_name: return False,event
+    except Exception as e:
+      return False,event
+  elif not get_repository_hooks(full_name,"Jenkins_Github_Hook"): return False,event
+  if (event == 'pull_request'): return True,event
   elif (event == 'issues') and (not data['action'] in ['opened']): return False,event
   elif (event == 'issue_comment'):
     if (not data['action'] in ['created']): return False,event
@@ -87,7 +93,7 @@ repo_name = payload["repository"]["full_name"]
 sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot"))
 sys.path.insert(0,os.path.join(BASE_DIRECTORY,"sdt/cms-bot/repos",repo_name.replace("-","_")))
 import repo_config
-from github_hooks_config import get_repository_hooks
+from github_hooks_config import get_repository_hooks, is_valid_gh_repo
 
 #check valid data, ip and signature of source
 valid, event = check_event(payload)
