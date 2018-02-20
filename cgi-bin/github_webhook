@@ -10,6 +10,15 @@ BASE_DIRECTORY = "/data"
 def check_event(data):
   if not 'HTTP_X_GITHUB_EVENT' in os.environ: return False,''
   event = os.environ['HTTP_X_GITHUB_EVENT']
+  try:
+    if repo_config.VALID_WEB_HOOKS:
+      ok_event = False
+      for ex in repo_config.VALID_WEB_HOOKS:
+        if re.match(event,'^'+ex+'$'):
+          ok_event = True
+          break
+      if not ok_event: return False,event
+  except: pass
   if not event in ['issues', 'issue_comment', 'pull_request' , 'push']: return False,event
   full_name = data['repository']['full_name']
   if (event == 'push'):
