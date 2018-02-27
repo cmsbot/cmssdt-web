@@ -15,10 +15,12 @@ def check_event(data):
     if repo_config.VALID_WEB_HOOKS:
       ok_event = False
       for ex in repo_config.VALID_WEB_HOOKS:
-        if re.match(event,'^'+ex+'$'):
+        if re.match('^'+ex+'$',event):
           ok_event = True
           break
-      if not ok_event: return False,event
+      if not ok_event:
+        print "ERROR: No web hook matched the event",event
+        return False,event
   except: pass
   full_name = data['repository']['full_name']
   if (event == 'push'):
