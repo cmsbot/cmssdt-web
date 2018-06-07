@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import bottle, os, re
 from os.path import exists
-from bottle import route, debug, abort
+from bottle import route, debug, abort, response
 from commands import getstatusoutput
 from time import strptime
 app = bottle.default_app()
@@ -35,6 +35,7 @@ def unitTest(architecture, release, subsystem, package):
 # to get raw JSON data
 @route('/raw/<architecture>/<release>/unitTestLogs/<subsystem>/<package>')
 def unitTestRaw(architecture, release, subsystem, package):
+  response.set_header('Content-Type', 'text/plain')
   return extractFile(architecture, release, 'unitTestLogs', '', format("unitTestLogs/%(subsystem)s/%(package)s/unitTest.log", subsystem=sanitize(subsystem), package=sanitize(package)),False)
 
 # to get display configs
@@ -52,6 +53,7 @@ def addOnTests(architecture, release, filename):
 @route('/raw/<architecture>/<release>/addOnTests/logs/<filename>')
 def addOnTestsRaw(architecture, release, filename):
   import urllib
+  response.set_header('Content-Type', 'text/plain')
   return extractFile(architecture, release, 'addOnTests', 'addOnTests/logs', sanitize(urllib.unquote(filename)),False)
 
 # to get display configs
@@ -70,6 +72,7 @@ def relValTests(architecture, release, workflow, filename):
 @route('/raw/<architecture>/<release>/pyRelValMatrixLogs/run/<workflow:re:[^/]+>/<filename>')
 def relValTestsRaw(architecture, release, workflow, filename):
   import urllib
+  response.set_header('Content-Type', 'text/plain')
   return extractFile(architecture, release, 'pyRelValMatrixLogs', 'pyRelValPartialLogs', sanitize(urllib.unquote(workflow))+'/'+sanitize(urllib.unquote(filename)),False)
 
 @route('/raw_read_config/<architecture>/<release>/pyRelValMatrixLogs/run/<workflow:re:[^/]+>/<filename>')
